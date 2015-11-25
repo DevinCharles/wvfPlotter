@@ -81,6 +81,9 @@ function varargout = wvfPlotter_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
+function figure1_ResizeFcn(hObject, eventdata, handles)
+
+
 function cmd_line_helper(hObject,handles)
 S = handles.Struct;
 handles.FolderName = S(1).defPath;
