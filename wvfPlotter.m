@@ -183,6 +183,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+%% --- Executes on selection change in files_listbox.
+function files_listbox_Callback(hObject, eventdata, handles)
 
 %% --- Executes on selection change in axis1_listbox.
 function axis1_listbox_Callback(hObject, eventdata, handles)
