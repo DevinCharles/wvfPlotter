@@ -86,6 +86,9 @@ function figure1_ResizeFcn(hObject, eventdata, handles)
 
 function cmd_line_helper(hObject,handles)
 S = handles.Struct;
+if ~strcmpi(S(1).defPath(end),'\')
+    S(1).defPath(end+1)='\';
+end
 handles.FolderName = S(1).defPath;
 handles.FileNames = {S.filename};
 getHdrInfo(hObject,handles);
@@ -257,8 +260,15 @@ else % Running from command line
     ch_sel{1} = find(ismember(TraceStruct.Name,...
         [handles.Struct(1).var_names{:}]));
     y_label = '';
+    try
+        filt_params = handles.filt_params;
+        set_filt = true;
+    catch
+        filt_params = '';
+        set_filt = false;
+    end
     
-    [handles.Struct(:).units] = TraceStruct.VUnit([ch_sel{:}]);
+    [handles.Struct(:).units] = deal(TraceStruct.VUnit([ch_sel{:}]));
     [handles.Struct(:).var_names] = deal(cellfun(@(x) {{x}},...
         TraceStruct.Name(ch_sel{:})));
 end
