@@ -29,22 +29,23 @@ function varargout = filter_setup()
     %% Loop Through Channels and Create
     filt_params = struct();
     for ind = 1:length(channels)
+        fld_name = strcat('fld_',channels{ind});
         try
             % If toggle exists, then we've already set values
-            toggle = handles.filt_params.(channels{ind}).('toggle');
-            type = handles.filt_params.(channels{ind}).('type');
+            toggle = handles.filt_params.(fld_name).('toggle');
+            type = handles.filt_params.(fld_name).('type');
             type = find(strcmpi(type,{'low','high','bandpass','stop'}));
-            value = handles.filt_params.(channels{ind}).('value');
-            order = handles.filt_params.(channels{ind}).('order');
+            value = handles.filt_params.(fld_name).('value');
+            order = handles.filt_params.(fld_name).('order');
         catch
             % If toggle doesn't exit, we haven't set defaults
-            handles.filt_params.(channels{ind}).('toggle') = false;
+            handles.filt_params.(fld_name).('toggle') = false;
             toggle = false;
-            handles.filt_params.(channels{ind}).('type') = 'low';
+            handles.filt_params.(fld_name).('type') = 'low';
             type = 1;
-            handles.filt_params.(channels{ind}).('value') = 20;
+            handles.filt_params.(fld_name).('value') = 20;
             value = 20;
-            handles.filt_params.(channels{ind}).('order') = 3;
+            handles.filt_params.(fld_name).('order') = 3;
             order = 3;
         end
         
@@ -53,7 +54,7 @@ function varargout = filter_setup()
             'Position', [10 h0-30*ind 95 20],'String',channels(ind),...
             'Value',abs(toggle),...
             'Callback', @update_handles,...
-            'tag',strcat(channels{ind},'`toggle'));
+            'tag',strcat(fld_name,'`toggle'));
         
         uicontrol('Parent', options, 'Style', 'text',...
             'String', 'Filter Type','HorizontalAlignment', 'left',...
@@ -64,7 +65,7 @@ function varargout = filter_setup()
             'Value',type,...
             'Position', [70 h0-30*ind 80 20],...
             'Callback', @update_handles,...
-            'tag',strcat(channels{ind},'`type'));
+            'tag',strcat(fld_name,'`type'));
         
         uicontrol('Parent', options, 'Style', 'text',...
             'String', 'Filter Value','HorizontalAlignment', 'left',...
@@ -74,7 +75,7 @@ function varargout = filter_setup()
             'String', num2str(value),'HorizontalAlignment', 'right',...
             'Position', [240 h0-30*ind 40 20],...
             'Callback', @update_handles,...
-            'tag',strcat(channels{ind},'`value'));
+            'tag',strcat(fld_name,'`value'));
         
         uicontrol('Parent', options, 'Style', 'text',...
             'String', 'Filter Order','HorizontalAlignment', 'left',...
@@ -84,7 +85,7 @@ function varargout = filter_setup()
             'String', num2str(order),'HorizontalAlignment', 'right',...
             'Position', [360 h0-30*ind 40 20],...
             'Callback', @update_handles,...
-            'tag',strcat(channels{ind},'`order'));
+            'tag',strcat(fld_name,'`order'));
     end
     guidata(gcbf, handles);
 end

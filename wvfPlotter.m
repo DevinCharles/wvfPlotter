@@ -277,7 +277,11 @@ end
 for file = 1:length(files_selected)
     HDRinfo = hdrread(strcat(FolderName,FileNames{files_selected(file)}));
     file_date(file) = HDRinfo.Group1.Trace1.Date;
-    file_time(file) = HDRinfo.Group1.Trace1.Time;
+    try
+        file_time(file) = HDRinfo.Group1.Trace1.Time;
+    catch
+        file_time(file) = HDRinfo.Group1.Trace1.Time1;
+    end
     for axis = 1:length(ch_sel)
         for num = 1:length(ch_sel{axis})
             
@@ -306,6 +310,8 @@ for file = 1:length(files_selected)
             for num = 1:length(ch_sel{axis})
                 try
                     name = TraceStruct.Name{ch_sel{axis}(num)};
+                    % Make names 'safe'
+                    name = strcat('fld_',name);
                     filter_val = filt_params.(name).('value');
                     filter_type = filt_params.(name).('type');
                     filter_ord = filt_params.(name).('order');
@@ -408,6 +414,10 @@ for i=1:length(t) % For each File
         set(print_fig,'Visible','off'); % Invisible figure for save
     else % Plotting more than one file - create figures for each
         print_fig = figure(i);
+        % Custom DataCursor
+        dcm_obj = datacursormode(print_fig);
+        datacursormode on
+        set(dcm_obj,'UpdateFcn',@dataCursor);
     end
 %---------------------This Plots on Figure(i)------------------------------    
     if length(y{1,1}) == 1 % If using only one axis to plot

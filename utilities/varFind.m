@@ -66,8 +66,16 @@ function [varNames,timeNames] = varFind(vars,names)
             [n,~] = listdlg('ListString',newName,...
                 'SelectionMode','single','ListSize',[350 200]);
             names{trace}{tracestr} = newName{n};
+            %
+            ind = strcmpi(vars,newName{n});
+            varNames{trace} = Vars(ind);
+            tn = cellfun(@(x) regexp(x,'\d+$','match'),varNames{trace},...
+                'UniformOutput',false);
+            tn_temp = cellfun(@(x) strcat('time_',x), tn,...
+                'UniformOutput',false);
+            timeNames{trace} = tn_temp{:};
             % Restart Loop
-            trace = 0;
+%             trace = 0;
         else
             varNames{trace} = Vars(ind);
             tn = cellfun(@(x) regexp(x,'\d+$','match'),varNames{trace},...
