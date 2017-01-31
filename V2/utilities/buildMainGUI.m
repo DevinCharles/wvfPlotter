@@ -123,15 +123,20 @@ function gui = buildMainGUI(gui)
 end
 
 function file_clbk(hObject, eventdata)
+    % Find Main GUI Handle
+    gui_handle = findobj(0,'Name','WVF Plotter');
+    % Get GUI Structure
+    gui = gui_handle.UserData;
+    
     % Coming from Context Menu
     if strcmpi(hObject.Type,'uimenu')
         % Recursive or Regular Open
         open_type = lower(hObject.Parent.Label);
         % File Type
         file_type = lower(hObject.Label);
-     % Coming from double-click
+     % Coming from single or double click
     else
-        open_type = get(1000,'SelectionType');
+        open_type = get(gui_handle,'SelectionType');
         file_type = 'all files';
     end
     switch open_type
@@ -139,10 +144,34 @@ function file_clbk(hObject, eventdata)
             files = getFiles(file_type,false);
         case 'open recursive'
             files = getFiles(file_type,true);
+        case 'normal'
+            % Single Click, after files have been added
+            if ~strcmpi(hObject.String{1},'Double Click to Open')
+                % Reset Selection to False
+                [gui.data(:).selection] = deal(false);
+                % Now make actual selection True
+                [gui.data(hObject.Value).selection] = deal(true);
+            end
+            % Update GUI Data
+            set(gui_handle,'UserData',gui);
+            % Call get Traces to update listboxes
+            %TODO: Do we really need to do this every time? Maybe just when
+            % a new directory is opened?
+            getTraces(gui);
+            return
         otherwise
             return
     end
-    disp(files);
+    [folders,names,exts]=cellfun(@fileparts,files,'UniformOutput',false);
+    
+    gui.data = struct(...
+        'selection',false,...
+        'filename',files,...
+        'folder',folders,...
+        'name',names,...
+        'ext',exts);
+    set(gui.listbox.files,'String',strcat(names,' (',exts,')'));
+    set(gui_handle,'UserData',gui);
 end
 
 function axs1_clbk(hObject, eventdata)

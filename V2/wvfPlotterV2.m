@@ -30,5 +30,6 @@ function varargout = wvfPlotterV2(varargin)
     gui.setup.main_fig = 1000;
     %% Build Main GUI
     gui = buildMainGUI(gui);
-    disp(gui);
+    % Save GUI Data Structure to the figure
+    set(gui.setup.main_fig,'UserData',gui);
     
