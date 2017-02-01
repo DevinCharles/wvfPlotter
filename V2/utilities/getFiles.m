@@ -24,6 +24,9 @@ function files = getFiles(file_type,recursive)
         startpath = strcat(getenv('HOMEPATH'),'\Desktop\');
     end
     results = uigetdir(startpath);
+    if ~results
+        return
+    end
     if recursive
         modifier = '\**\*';
     else
