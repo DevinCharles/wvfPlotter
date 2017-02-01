@@ -141,9 +141,17 @@ function file_clbk(hObject, eventdata)
     end
     switch open_type
         case 'open'
-            files = getFiles(file_type,false);
+            try
+                files = getFiles(file_type,false);
+            catch
+                return
+            end
         case 'open recursive'
-            files = getFiles(file_type,true);
+            try
+                files = getFiles(file_type,true);
+            catch
+                return
+            end
         case 'normal'
             % Single Click, after files have been added
             if ~strcmpi(hObject.String{1},'Double Click to Open')
@@ -151,13 +159,14 @@ function file_clbk(hObject, eventdata)
                 [gui.data(:).selection] = deal(false);
                 % Now make actual selection True
                 [gui.data(hObject.Value).selection] = deal(true);
+                % Get the selected file's traces
+                ind = find([gui.data(hObject.Value).selection],1);
+                % Update the axes listboxes
+                gui.listbox.axes_left.String = [gui.data(ind).headerdata.name];
+                gui.listbox.axes_right.String = [gui.data(ind).headerdata.name];
+                % Update GUI Data
+                set(gui_handle,'UserData',gui);
             end
-            % Update GUI Data
-            set(gui_handle,'UserData',gui);
-            % Call get Traces to update listboxes
-            %TODO: Do we really need to do this every time? Maybe just when
-            % a new directory is opened?
-            getTraces(gui);
             return
         otherwise
             return
@@ -170,7 +179,13 @@ function file_clbk(hObject, eventdata)
         'folder',folders,...
         'name',names,...
         'ext',exts);
-    set(gui.listbox.files,'String',strcat(names,' (',exts,')'));
+    
+    % Get traces for each file
+    gui = getTraces(gui);
+    
+    set(gui.listbox.files,'String',strcat(names,' (',exts,')'),'Value',[]);
+    
+    % Update the GUI Structure
     set(gui_handle,'UserData',gui);
 end
 
