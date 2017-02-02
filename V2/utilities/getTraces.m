@@ -17,10 +17,12 @@ function gui = getTraces(gui)
                         Trace = strcat('Trace',num2str(trace_num));
                         % Fill Headerdata Structure
                         gui.data(file_num).headerdata(counter).name = HDRinfo.(group).(Trace).TraceName;
-                        gui.data(file_num).headerdata(counter).GTpair=[group_num,trace_num];
+                        gui.data(file_num).headerdata(counter).GTpair = [group_num,trace_num];
                         gui.data(file_num).headerdata(counter).HUnit = HDRinfo.(group).(Trace).HUnit;
                         gui.data(file_num).headerdata(counter).VUnit = HDRinfo.(group).(Trace).VUnit;
                         gui.data(file_num).headerdata(counter).Samples = HDRinfo.(group).(Trace).BlockSize;
+                        gui.data(file_num).headerdata(counter).Axis1Selection = false;
+                        gui.data(file_num).headerdata(counter).Axis2Selection = false;
                         counter=counter+1;
                     end
                 end

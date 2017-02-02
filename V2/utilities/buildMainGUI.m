@@ -106,7 +106,8 @@ function gui = buildMainGUI(gui)
         'Value',[],...
         'Position',[2*brdr_w+lsbx_w brdr_h lsbx_w lsbx_h],...
         'Max',2,...
-        'Callback',@axs1_clbk);
+        'Tag','listbox_left',...
+        'Callback',@axes_clbk);
     %% LISTBOX - Axis Right
     titl_axs2 = uicontrol(pnl_lstbx,...
         'Style','text',...
@@ -119,7 +120,8 @@ function gui = buildMainGUI(gui)
         'Value',[],...
         'Position',[3*brdr_w+2*lsbx_w brdr_h lsbx_w lsbx_h],...
         'Max',2,...
-        'Callback',@axs2_clbk);
+        'Tag','listbox_right',...
+        'Callback',@axes_clbk);
 
     %% PLOT OPTIONS SETUP
     brdr_w = 010;
@@ -269,10 +271,32 @@ function file_clbk(hObject, eventdata)
     set(gui_handle,'UserData',gui);
 end
 
-function axs1_clbk(hObject, ~)
-end
-
-function axs2_clbk(hObject, ~)
+function axes_clbk(hObject, ~)
+    % Find Main GUI Handle
+    gui_handle = findobj(0,'Name','WVF Plotter');
+    % Get GUI Structure
+    gui = gui_handle.UserData;
+    
+    % If the listbox isn't empty
+    if ~strcmpi(hObject.String{1},'')
+        % Get the File Selection
+        file_selection = find([gui.data.selection]);
+        % Determine Which List Box
+        if strcmpi(hObject.Tag,'listbox_left')
+            selection = 'Axis1Selection';
+        elseif strcmpi(hObject.Tag,'listbox_right')
+            selection = 'Axis2Selection';
+        end
+        for i = 1:length(file_selection)
+            % Reset Trace Selection
+            [gui.data(file_selection(i)).headerdata.(selection)] = deal(false);
+            % Make Selected Traces True
+            [gui.data(file_selection(i)).headerdata(hObject.Value).(selection)] = deal(true);
+        end
+        set(gui_handle,'UserData',gui);
+    else
+        return
+    end
 end
 
 function grid_clbk(hObject, ~)
