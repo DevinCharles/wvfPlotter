@@ -40,7 +40,7 @@ function files = getFiles(file_type,recursive)
             dat_files = dir(strcat(results,modifier,'.dat'));
             % Get CSV Files
             csv_files = dir(strcat(results,modifier,'.csv'));
-            data_files = [hdr_files,dat_files,csv_files];
+            data_files = [hdr_files;dat_files;csv_files];
         case 'wvf files'
             % Get WVF Headers
             data_files = dir(strcat(results,modifier,'.hdr'));
