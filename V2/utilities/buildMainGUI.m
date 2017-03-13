@@ -195,7 +195,8 @@ function gui = buildMainGUI(gui)
         'Style','pushbutton',...
         'String','Plot',...
         'FontWeight','bold',...
-        'Position',[286+78+10, 10, 78, 78]);
+        'Position',[286+78+10, 10, 78, 78],...
+        'Callback',@plot_clbk);
     psbn_anly = uicontrol(pnl_pltop,...
         'Style','pushbutton',...
         'String','Analysis',...
@@ -226,12 +227,14 @@ function file_clbk(hObject, eventdata)
             try
                 files = getFiles(file_type,false);
             catch
+                error('Error getting files')
                 return
             end
         case 'open recursive'
             try
                 files = getFiles(file_type,true);
             catch
+                error('Error getting files')
                 return
             end
         case 'normal'
@@ -241,11 +244,18 @@ function file_clbk(hObject, eventdata)
                 [gui.data(:).selection] = deal(false);
                 % Now make actual selection True
                 [gui.data(hObject.Value).selection] = deal(true);
-                % Get the selected file's traces
-                ind = find([gui.data(hObject.Value).selection],1);
+                % Find file index (one file)
+                ind = find([gui.data.selection],1);
                 % Update the axes listboxes
-                gui.listbox.axes_left.String = [gui.data(ind).headerdata.name];
-                gui.listbox.axes_right.String = [gui.data(ind).headerdata.name];
+                if isempty(ind)
+                    % Special Case: Deselected all files
+                    gui.listbox.axes_left.String = [];
+                    gui.listbox.axes_right.String = [];
+                else
+                    % Normal Case: Select one or more files
+                    gui.listbox.axes_left.String = {gui.data(ind).headerdata.name};
+                    gui.listbox.axes_right.String = {gui.data(ind).headerdata.name};
+                end
                 % Update GUI Data
                 set(gui_handle,'UserData',gui);
             end
@@ -265,7 +275,7 @@ function file_clbk(hObject, eventdata)
     % Get traces for each file
     gui = getTraces(gui);
     
-    set(gui.listbox.files,'String',strcat(names,' (',exts,')'),'Value',[]);
+    set(gui.listbox.files,'String',strcat(names,' (',exts,')'));
     
     % Update the GUI Structure
     set(gui_handle,'UserData',gui);
@@ -335,4 +345,21 @@ function lims_clbk(hObject,~)
                 set(axes,'YLim',ylims)
             end
     end     
+end
+
+function plot_clbk(~,eventdata)
+    % Find Main GUI Handle
+    gui_handle = findobj(0,'Name','WVF Plotter');
+    % Get GUI Structure
+    gui = gui_handle.UserData;
+    % Check that a File and a Trace are Selected
+    try
+        if ~any([gui.data(find([gui.data.selection],1)).headerdata.Axis1Selection])
+            return
+        end
+    catch
+        return
+    end
+    % Read data from files
+    gui = readData(gui);
 end
