@@ -1,7 +1,7 @@
 function gui = getTraces(gui)
     % Full path & filename (w/o extension) and extensions
     fname = {gui.data.filename};
-    ext = {gui.data.ext};
+    ext = lower({gui.data.ext});
     for file_num = 1:length(fname)
         switch ext{file_num}
             case '.hdr'
