@@ -1,0 +1,97 @@
+IDBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,8,File identifier; always contains “MDF “. (“MDF” followed by five spaces),*char
+CHAR ,8,Format identifier; a textual representation of the format version for display; e.g. “3.00 ”,*char
+CHAR ,8,Program identifier; to identify the program which generated the MDF file,*char
+UINT16 ,1,Byte order; 0 = Little endian,uint16
+UINT16 ,1,Floating-point format used. 0 = Floating-point format compliant with IEEE 754 standard,uint16
+UINT16 ,1,Version number of the MDF; i.e. 300 for this version,uint16
+UINT16 ,1,Reserved,uint16
+CHAR ,2,Reserved,*char
+CHAR ,30,Reserved,*char
+,,,
+HDBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,2,Block type identifier; always “HD”,*char
+UINT16 ,1,Block size of this block in bytes (entire HDBLOCK),uint16
+LINK ,1,Pointer to the first file group block (DGBLOCK),int32
+LINK ,1,Pointer to the measurement file comment text (TXBLOCK) (NIL allowed),int32
+LINK ,1,Pointer to program block (PRBLOCK) (NIL allowed),int32
+UINT16 ,1,Number of data groups,uint16
+CHAR ,10,Date at which the recording was started in “DD:MM:YYYY” format,*char
+CHAR ,8,Time at which the recording was started in “HH:MM:SS” format,*char
+CHAR ,32,Author’s name,*char
+CHAR ,32,Name of organization or department,*char
+CHAR ,32,Project name,*char
+CHAR ,32,Measurement object e. g. the vehicle identification,*char
+,,,
+TXBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,2,Block type identifier; always “TX”,*char
+UINT16 ,1,Block size of this block in bytes (entire TXBLOCK),uint16
+CHAR ,variable ,Text (new line indicated by CR and LF; end of text indicated by 0),*char
+,,,
+PRBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,2,Block type identifier; always “PR”,*char
+UINT16 ,1,Block size of this block in bytes (entire PRBLOCK),uint16
+CHAR ,variable ,Program-specific data,*char
+,,,
+DGBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,2,Block type identifier; always “DG”,*char
+UINT16 ,1,Block size of this block in bytes (entire DGBLOCK),uint16
+LINK ,1,Pointer to next data group block (DGBLOCK) (NIL allowed),int32
+LINK ,1,Pointer to next channel group block (CGBLOCK) (NIL allowed),int32
+LINK ,1,Reserved,int32
+LINK ,1,Pointer to the data records (see separate chapter on data storage),int32
+UINT16 ,1,Number of channel groups,uint16
+UINT16 ,1,Number of record IDs in the data block; 0 = data records without record ID; 1 = record ID; (UINT8) before each data record; 2 = record ID (UINT8) before and after each data record,uint16
+UINT32 ,1,Reserved,uint32
+,,,
+CGBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,2,Block type identifier; always “CG”,*char
+UINT16 ,1,Block size of this block in bytes (entire CGBLOCK),uint16
+LINK ,1,Pointer to next data Channel group block (CGBLOCK) (NIL allowed),int32
+LINK ,1,Pointer to first channel block (CNBLOCK) (NIL allowed),int32
+LINK ,1,Pointer to channel group comment text (TXBLOCK) (NIL allowed),int32
+UINT16 ,1,Record ID,uint16
+UINT16 ,1,Number of channels,uint16
+UINT16 ,1,Data record size in bytes (without the record ID); i.e. data size of the channel group for each sample,uint16
+UINT32 ,1,Number of records,uint32
+,,,
+CNBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,2,Block type identifier; always “CN”,*char
+UINT16 ,1,Block size of this block in bytes (entire CNBLOCK),uint16
+LINK ,1,Pointer to next channel block (CNBLOCK) of this channel group (NIL allowed),int32
+LINK ,1,Pointer to the conversion formula (CCBLOCK) of this signal (NIL allowed).,int32
+LINK ,1,Reserved,int32
+LINK ,1,Reserved,int32
+LINK ,1,Pointer to the channel comment (TXBLOCK) of this signal (NIL allowed),int32
+UINT16 ,1,Channel type: 0 = data channel; 1 = time channel for all signals of this group (in each channel group; exactly one channel must be defined as time channel),uint16
+CHAR ,32,Signal name; i.e. the first 32 characters of the ASAM-MCD unique name,*char
+CHAR ,128,Signal description,*char
+UINT16 ,1,Number of the first bits [0..n] (bit position within a byte: bit 0 is the least significant bit; bit 7 is the most significant bit),uint16
+UINT16 ,1,Number of bits,uint16
+UINT16 ,1,Signal data type: 0 = unsigned integer; 1 = signed integer (two’s complement); 2-3 = IEEE; 754 floating-point format; 7 = String (NULL terminated); 8 = Byte Array,uint16
+BOOL ,1,Value range – known implementation value,bool
+REAL ,1,Value range – minimum implementation value,real*8
+REAL ,1,Value range – maximum implementation value,real*8
+REAL ,1,Rate in which the variable was sampled. Unit [s],real*8
+LINK ,1,Pointer to the ASAM-MCD unique name (TXBLOCK) (NIL allowed),int32
+LINK ,1,Pointer to TXBLOCK that contains the signal's display identifier (default: NIL; NIL allowed),int32
+UINT16 ,1,Byte offset of the signal in the data record in addition to bit offset (default value: 0) note: this fields shall only be used if the CGBLOCK record size and the actual offset is larger than 8192 Bytes to ensure compatibility; it enables to write data blocks larger than 8k Bytes,uint16
+,,,
+CCBLOCK,,,
+Data Type,Number,Description,Matlab Type
+CHAR ,2,Block type identifier; always “CC”,*char
+UINT16 ,1,Block size of this block in bytes (entire CCBLOCK),uint16
+BOOL ,1,Value range – known physical value,bool
+REAL ,1,Value range – minimum physical value,real*8
+REAL ,1,Value range – maximum physical value,real*8
+CHAR ,20,Physical unit,*char
+UINT16 ,1,Conversion formula identifier: 0 = parametric; linear; 1 = tabular with interpolation; 2 = tabular; 6 = polynomial function; 7 = exponential function; 8 = logarithmic function; 9 = ASAP2 Rational conversion formula; 10 = ASAM-MCD2 Text formula; 11 = ASAM-MCD2 Text Table; (COMPU_VTAB); 12 = ASAM-MCD2 Text Range Table (COMPU_VTAB_RANGE); 132 = Date (Based on 7 Byte Date data structure); 133 = time (Based on 6 Byte Time data structure); 65535 = 1:1 conversion formula (Int = Phys),uint16
+UINT16 ,1,Number of value pairs for conversion formulas 1; 2; 11 and 12 or number of parameters,uint16
+,,"""Parameter (for type 0; 6;7;8; 9) or table (for type 1; 2; 11; or 12) or text (for type 10); depending on the conversion formula identifier. See formula-specific block supplement"" ",#N/A
