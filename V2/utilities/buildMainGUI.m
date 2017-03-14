@@ -253,7 +253,9 @@ function file_clbk(hObject, eventdata)
                     gui.listbox.axes_right.String = [];
                 else
                     % Normal Case: Select one or more files
+                    gui.listbox.axes_left.Value = 1;
                     gui.listbox.axes_left.String = {gui.data(ind).headerdata.name};
+                    gui.listbox.axes_right.Value = 1;
                     gui.listbox.axes_right.String = {gui.data(ind).headerdata.name};
                 end
                 % Update GUI Data
@@ -276,6 +278,7 @@ function file_clbk(hObject, eventdata)
     gui = getTraces(gui);
     
     set(gui.listbox.files,'String',strcat(names,' (',exts,')'));
+    set(gui.listbox.files,'Value',1)    
     
     % Update the GUI Structure
     set(gui_handle,'UserData',gui);
@@ -331,6 +334,8 @@ function lims_clbk(hObject,~)
             xlims = str2double({xlim0.String,xlim1.String});
             if any(isnan(xlims))
                 return
+            elseif xlims(1)>xlims(2)
+                return
             else
                 set(axes,'XLim',xlims)
             end
@@ -341,6 +346,8 @@ function lims_clbk(hObject,~)
             ylims = str2double({ylim0.String,ylim1.String});
             if any(isnan(ylims))
                 return
+            elseif ylims(1)>ylims(2)
+                return                
             else
                 set(axes,'YLim',ylims)
             end
@@ -360,6 +367,6 @@ function plot_clbk(~,eventdata)
     catch
         return
     end
-    % Read data from files
-    gui = readData(gui);
+    % Plot data from files
+    gui = plotData(gui);
 end
