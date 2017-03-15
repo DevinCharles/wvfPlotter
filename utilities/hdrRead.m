@@ -1,3 +1,6 @@
+[fname,folder]=uigetfile('*.hdr');
+filename = strcat(folder,fname);
+
 tic
 fid = fopen(filename);
 ln = {};
