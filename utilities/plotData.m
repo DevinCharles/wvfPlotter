@@ -66,7 +66,16 @@ function gui = plotData(gui)
         else
             set(gca,{'XGrid','YGrid','XMinorGrid','YMinorGrid'},repmat({'off'},1,4))
         end
-        
+        if exist('dataCursor','file')==2
+            % Custom DataCursor
+            dcm_obj = datacursormode(gcf);
+            datacursormode on
+            set(dcm_obj,'UpdateFcn',@dataCursor);
+        else
+            warning('UtilityFunctions is not installed. Get it here:')
+            disp('<a href="https://www.mathworks.com/matlabcentral/fileexchange/54074-devincharles-wvfplotter">https://www.mathworks.com/matlabcentral/fileexchange/54074-devincharles-wvfplotter</a>')
+        end
+        % Plot on the Second Axis
         if ~isempty(tr)
             yyaxis right
             for i = 1:length(tr)

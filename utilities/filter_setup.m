@@ -1,12 +1,14 @@
 % Copyright (C) 2015  Devin C Prescott
 function varargout = filter_setup()
-    
-    % Get Data Structure from WVF Plotter
-    global handles fig_handle
-    fig_handle = gcbf;
-    handles = guidata(fig_handle);
+    % Find Main GUI Handle
+    gui_handle = findobj(0,'Name','WVF Plotter');
+    % Get GUI Structure
+    gui = gui_handle.UserData;
+    % Check that a File and a Trace are Selected
     try
-        channels = handles.TraceStruct.Name([handles.ch_sel{:}]');
+        if ~any([gui.data(find([gui.data.selection],1)).headerdata.Axis1Selection])
+            return
+        end
     catch
         return
     end
@@ -14,6 +16,10 @@ function varargout = filter_setup()
     % Setup Figure
     f = figure(2000);
     f.Position(3)= 600;
+    
+    left = gui.listbox.axes_left.String(gui.listbox.axes_left.Value);
+    right = gui.listbox.axes_right.String(gui.listbox.axes_right.Value);
+    channels = [left(:);right(:)];
     
     f.Position(4)= (length(channels))*(30+5)+45;
     h0 = f.Position(4)-30-5*(length(channels)-1);
@@ -32,20 +38,20 @@ function varargout = filter_setup()
         fld_name = strcat('fld_',channels{ind});
         try
             % If toggle exists, then we've already set values
-            toggle = handles.filt_params.(fld_name).('toggle');
-            type = handles.filt_params.(fld_name).('type');
+            toggle = gui.filt_params.(fld_name).('toggle');
+            type = gui.filt_params.(fld_name).('type');
             type = find(strcmpi(type,{'low','high','bandpass','stop'}));
-            value = handles.filt_params.(fld_name).('value');
-            order = handles.filt_params.(fld_name).('order');
+            value = gui.filt_params.(fld_name).('value');
+            order = gui.filt_params.(fld_name).('order');
         catch
             % If toggle doesn't exit, we haven't set defaults
-            handles.filt_params.(fld_name).('toggle') = false;
+            gui.filt_params.(fld_name).('toggle') = false;
             toggle = false;
-            handles.filt_params.(fld_name).('type') = 'low';
+            gui.filt_params.(fld_name).('type') = 'low';
             type = 1;
-            handles.filt_params.(fld_name).('value') = 20;
+            gui.filt_params.(fld_name).('value') = 20;
             value = 20;
-            handles.filt_params.(fld_name).('order') = 3;
+            gui.filt_params.(fld_name).('order') = 3;
             order = 3;
         end
         
@@ -53,7 +59,7 @@ function varargout = filter_setup()
         uicontrol('Parent', toggles, 'Style', 'toggle', ...
             'Position', [10 h0-30*ind 95 20],'String',channels(ind),...
             'Value',abs(toggle),...
-            'Callback', @update_handles,...
+            'Callback', @update_gui,...
             'tag',strcat(fld_name,'`toggle'));
         
         uicontrol('Parent', options, 'Style', 'text',...
@@ -64,7 +70,7 @@ function varargout = filter_setup()
             'String', {'Low-Pass','High-Pass','Band-Pass','Band-Stop'},...
             'Value',type,...
             'Position', [70 h0-30*ind 80 20],...
-            'Callback', @update_handles,...
+            'Callback', @update_gui,...
             'tag',strcat(fld_name,'`type'));
         
         uicontrol('Parent', options, 'Style', 'text',...
@@ -74,7 +80,7 @@ function varargout = filter_setup()
         uicontrol('Parent', options, 'Style', 'edit',...
             'String', num2str(value),'HorizontalAlignment', 'right',...
             'Position', [240 h0-30*ind 40 20],...
-            'Callback', @update_handles,...
+            'Callback', @update_gui,...
             'tag',strcat(fld_name,'`value'));
         
         uicontrol('Parent', options, 'Style', 'text',...
@@ -84,15 +90,19 @@ function varargout = filter_setup()
         uicontrol('Parent', options, 'Style', 'edit',...
             'String', num2str(order),'HorizontalAlignment', 'right',...
             'Position', [360 h0-30*ind 40 20],...
-            'Callback', @update_handles,...
+            'Callback', @update_gui,...
             'tag',strcat(fld_name,'`order'));
     end
-    guidata(gcbf, handles);
+    % Set GUI Structure
+    gui_handle.UserData= gui;
 end
+
+function update_gui(source,~)
+    % Find Main GUI Handle
+    gui_handle = findobj(0,'Name','WVF Plotter');
+    % Get GUI Structure
+    gui = gui_handle.UserData;
     
-function update_handles(source,~)
-    global fig_handle
-    handles = guidata(fig_handle);
     field = strsplit(source.Tag,'`');
     switch field{2}
         case 'value'
@@ -105,6 +115,8 @@ function update_handles(source,~)
         case 'toggle'
             data = logical(source.Value);     
     end
-    handles.filt_params.(field{1}).(field{2}) = data;
-    guidata(fig_handle, handles);
+    gui.filt_params.(field{1}).(field{2}) = data;
+    
+    % Set GUI Structure
+    gui_handle.UserData= gui;
 end
