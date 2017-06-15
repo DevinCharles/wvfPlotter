@@ -30,23 +30,55 @@ function gui = plotData(gui)
             % Started down the right path... then hacked it together to get
             % it working quickly...
             sel_inds = [find(axis_1_selection),find(axis_2_selection)];
+            
             for i = 1:size(pairs,1)
+                trace_name = gui.data(file_num).headerdata(sel_inds(i)).name;
+                try
+                    filter_data = gui.filt_params.(strcat('fld_',trace_name));
+                    filt_bool = filter_data.toggle;
+                catch
+                    filt_bool = false;
+                end
+                
                 [gui.data(file_num).headerdata(sel_inds(i)).y,...
                     gui.data(file_num).headerdata(sel_inds(i)).t] = ...
                     wvfread(filename, pairs(i,1), pairs(i,2));
+                
+                if filt_bool
+                    yf = auto_butter(...
+                        gui.data(file_num).headerdata(sel_inds(i)).y,...
+                        gui.data(file_num).headerdata(sel_inds(i)).t,...
+                        0,...
+                        filter_data.value,...
+                        filter_data.type,...
+                        filter_data.order);
+                    gui.data(file_num).headerdata(sel_inds(i)).y = yf{:};
+                end
             end
+            
         end
        
         % Now plot the data
         tl = {gui.data(file_num).headerdata(axis_1_selection).t};
         yl = {gui.data(file_num).headerdata(axis_1_selection).y};
+%         flt_flds = strcat('fld_',{gui.data(file_num).headerdata(axis_1_selection).name});
+%         yfl = auto_butter(yl,tl,0,...
+%             gui.filt_params.filter_val,...
+%             gui.filt_params.filter_type,...
+%             gui.filt_params.filter_ord);
+        
         nl = {gui.data(file_num).headerdata(axis_1_selection).name};
         
         tr = {gui.data(file_num).headerdata(axis_2_selection).t};
         yr = {gui.data(file_num).headerdata(axis_2_selection).y};
+%         yfr = auto_butter(yr,tr,0,...
+%             gui.filt_params.filter_val,...
+%             gui.filt_params.filter_type,...
+%             gui.filt_params.filter_ord);
+        
         nr = {gui.data(file_num).headerdata(axis_2_selection).name};
         
-        colors = repmat(colormap(parula(5)),3,1);
+        colors = repmat(colormap(parula(5)),100,1);
         
         figure(ind)
         clf;
@@ -61,6 +93,12 @@ function gui = plotData(gui)
             hold off
         end
         legend(nl,'Interpreter','none')
+        [~,title_str,~] = fileparts(filename);
+        title(title_str)
+        
+        vunit = {gui.data(file_num).headerdata(axis_1_selection).VUnit};
+        ylabel(strcat('[',strjoin(vunit,'  \\\\  '),']'))
+        
         if gui.checkbox.grid.Value
             set(gca,{'XGrid','YGrid','XMinorGrid','YMinorGrid'},repmat({'on'},1,4))
         else
@@ -85,6 +123,8 @@ function gui = plotData(gui)
                 hold off
             end
             legend([nl(:);nr(:)],'Interpreter','none')
+            vunit = {gui.data(file_num).headerdata(axis_2_selection).VUnit};
+            ylabel(strcat('[',strjoin(vunit,'  \\\\  '),']'))
         end
         
     end

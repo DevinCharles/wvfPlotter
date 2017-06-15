@@ -118,5 +118,9 @@ function update_gui(source,~)
     gui.filt_params.(field{1}).(field{2}) = data;
     
     % Set GUI Structure
-    gui_handle.UserData= gui;
+    gui_handle.UserData = gui;
+    
+    % Plot data from files
+    gui = plotData(gui);
+    gui_handle.UserData = gui;
 end

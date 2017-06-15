@@ -254,10 +254,24 @@ function file_clbk(hObject, eventdata)
                     gui.listbox.axes_right.String = [];
                 else
                     % Normal Case: Select one or more files
-                    gui.listbox.axes_left.Value = 1;
+                    try
+                        gui.listbox.axes_left.Value = gui.listbox.axes_left.Value;
+                    catch
+                        gui.listbox.axes_left.Value = 1;
+                    end
                     gui.listbox.axes_left.String = {gui.data(ind).headerdata.name};
-                    gui.listbox.axes_right.Value = 1;
+                    
+                    try
+                        gui.listbox.axes_right.Value = gui.listbox.axes_right.Value;
+                    catch
+                        gui.listbox.axes_right.Value = 1;
+                    end
                     gui.listbox.axes_right.String = {gui.data(ind).headerdata.name};
+                    
+                    for file = [hObject.Value]
+                        [gui.data(file).headerdata(gui.listbox.axes_left.Value).Axis1Selection] = deal(true);
+                        [gui.data(file).headerdata(gui.listbox.axes_right.Value).Axis2Selection] = deal(true);
+                    end
                 end
                 % Update GUI Data
                 set(gui_handle,'UserData',gui);
@@ -370,6 +384,7 @@ function plot_clbk(~,eventdata)
     end
     % Plot data from files
     gui = plotData(gui);
+    gui_handle.UserData = gui;
 end
 
 function filt_clbk(~,eventdata)
